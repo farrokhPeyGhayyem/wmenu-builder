@@ -4,66 +4,72 @@ namespace Harimayco\Menu\Controllers;
 
 use Harimayco\Menu\Facades\Menu;
 use Illuminate\Http\Request;
-use App\Http\Requests;
 use Modules\Base\Http\Controllers\Controller;  // Use your controller from the Base module
 use Harimayco\Menu\Models\Menus;
 use Harimayco\Menu\Models\MenuItems;
 
 class MenuController extends Controller
 {
-
     public function createnewmenu()
     {
-
         $menu = new Menus();
         $menu->name = request()->input("menuname");
         $menu->save();
-        return json_encode(array("resp" => $menu->id));
+
+        return response()->json(["resp" => $menu->id]);
     }
 
     public function deleteitemmenu()
     {
         $menuitem = MenuItems::find(request()->input("id"));
-
-        $menuitem->delete();
+        if ($menuitem) {
+            $menuitem->delete();
+        }
     }
 
     public function deletemenug()
     {
-        $menus = new MenuItems();
-        $getall = $menus->getall(request()->input("id"));
-        if (count($getall) == 0) {
+        $getall = MenuItems::where('menu', request()->input("id"))->get();
+        if ($getall->isEmpty()) {
             $menudelete = Menus::find(request()->input("id"));
-            $menudelete->delete();
-
-            return json_encode(array("resp" => "you delete this item"));
+            if ($menudelete) {
+                $menudelete->delete();
+            }
+            return response()->json(["resp" => "you delete this item"]);
         } else {
-            return json_encode(array("resp" => "You have to delete all items first", "error" => 1));
-
+            return response()->json([
+                "resp" => "You have to delete all items first",
+                "error" => 1
+            ]);
         }
     }
 
     public function updateitem()
     {
         $arraydata = request()->input("arraydata");
+
         if (is_array($arraydata)) {
             foreach ($arraydata as $value) {
-                $menuitem = MenuItems::find($value['id']);
-                $menuitem->label = $value['label'];
-                $menuitem->link = $value['link'];
-                $menuitem->class = $value['class'];
+                $menuitem = MenuItems::find($value['id'] ?? null);
+                if (!$menuitem) continue;
+
+                $menuitem->label = $value['label'] ?? '';
+                $menuitem->link = $value['link'] ?? '';
+                $menuitem->class = $value['class'] ?? '';
                 if (config('menu.use_roles')) {
-                    $menuitem->role_id = $value['role_id'] ? $value['role_id'] : 0 ;
+                    $menuitem->role_id = $value['role_id'] ?? 0;
                 }
                 $menuitem->save();
             }
         } else {
             $menuitem = MenuItems::find(request()->input("id"));
-            $menuitem->label = request()->input("label");
-            $menuitem->link = request()->input("url");
-            $menuitem->class = request()->input("clases");
+            if (!$menuitem) return;
+
+            $menuitem->label = request()->input("label", '');
+            $menuitem->link = request()->input("url", '');
+            $menuitem->class = request()->input("clases", '');
             if (config('menu.use_roles')) {
-                $menuitem->role_id = request()->input("role_id") ? request()->input("role_id") : 0 ;
+                $menuitem->role_id = request()->input("role_id", 0);
             }
             $menuitem->save();
         }
@@ -71,39 +77,44 @@ class MenuController extends Controller
 
     public function addcustommenu()
     {
-
         $menuitem = new MenuItems();
         $menuitem->label = request()->input("labelmenu");
         $menuitem->link = request()->input("linkmenu");
-        if (config('menu.use_roles')) {
-            $menuitem->role_id = request()->input("rolemenu") ? request()->input("rolemenu")  : 0 ;
-        }
         $menuitem->menu = request()->input("idmenu");
         $menuitem->sort = MenuItems::getNextSortRoot(request()->input("idmenu"));
-        $menuitem->save();
 
+        if (config('menu.use_roles')) {
+            $menuitem->role_id = request()->input("rolemenu", 0);
+        }
+
+        $menuitem->save();
     }
 
     public function generatemenucontrol()
     {
         $menu = Menus::find(request()->input("idmenu"));
-        $menu->name = request()->input("menuname");
+        if ($menu) {
+            $menu->name = request()->input("menuname");
+            $menu->save();
+        }
 
-        $menu->save();
-        if (is_array(request()->input("arraydata"))) {
-            foreach (request()->input("arraydata") as $value) {
+        $arraydata = request()->input("arraydata");
 
-                $menuitem = MenuItems::find($value["id"]);
-                $menuitem->parent = $value["parent"];
-                $menuitem->sort = $value["sort"];
-                $menuitem->depth = $value["depth"];
+        if (is_array($arraydata)) {
+            foreach ($arraydata as $value) {
+                $menuitem = MenuItems::find($value["id"] ?? null);
+                if (!$menuitem) continue;
+
+                $menuitem->parent = $value["parent"] ?? 0;
+                $menuitem->sort = $value["sort"] ?? 0;
+                $menuitem->depth = $value["depth"] ?? 0;
                 if (config('menu.use_roles')) {
-                    $menuitem->role_id = request()->input("role_id");
+                    $menuitem->role_id = $value["role_id"] ?? 0;
                 }
                 $menuitem->save();
             }
         }
-        echo json_encode(array("resp" => 1));
 
+        return response()->json(["resp" => 1]);
     }
 }
