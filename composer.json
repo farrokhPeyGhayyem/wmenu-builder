@@ -1,17 +1,24 @@
 {
-    "name": "harimayco/laravel-menu",
-    "description": "drag and drop menu generator like wordpress for laravel 5",
-    "keywords": ["Laravel", "Menu", "Wordpress", "Builder"],
+    "name": "farrokhpeyghayyem/wmenu-builder",
+    "description": "Drag and drop menu generator like WordPress for Laravel 9, 10, 11",
+    "keywords": ["Laravel", "Menu", "Builder", "Wordpress", "Admin"],
+    "type": "library",
+    "license": "MIT",
     "authors": [
-    	{
+        {
+            "name": "Farrokh Peyghayyem",
+            "email": "your-email@example.com",
+            "role": "Maintainer"
+        },
+        {
             "name": "Rendy Harimayco",
             "email": "rendyharimayco@gmail.com",
-            "role": "Developer"
+            "role": "Original Developer"
         },
         {
             "name": "Cristian Garcia",
             "email": "informacion@cristiangarcia.co",
-            "role" : "Original Developer"
+            "role": "Original Developer"
         }
     ],
     "require": {
@@ -20,7 +27,7 @@
     },
     "autoload": {
         "psr-4": {
-          "Harimayco\\Menu\\": "src/"
+            "Harimayco\\Menu\\": "src/"
         }
     },
     "extra": {
