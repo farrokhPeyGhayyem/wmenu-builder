@@ -1,6 +1,6 @@
 <?php
 
-Route::group(['middleware' => config('menu.middleware')], function () {
+Route::group(['middleware' =>'web'], function () {
     //Route::get('wmenuindex', array('uses'=>'\Harimayco\Menu\Controllers\MenuController@wmenuindex'));
     $path = rtrim(config('menu.route_path'));
     Route::post($path . '/addcustommenu', array('as' => 'haddcustommenu', 'uses' => '\Harimayco\Menu\Controllers\MenuController@addcustommenu'));
